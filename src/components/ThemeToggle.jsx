@@ -1,26 +1,21 @@
-import React, { useContext } from "react";
+import { useContext } from "react";
 import { ThemeContext } from "../contexts/ThemeContext";
 
-export default function ThemeToggle({ style }) {
+export default function ThemeToggle() {
   const { theme, toggle } = useContext(ThemeContext);
 
   return (
     <button
       onClick={toggle}
-      aria-label="Toggle theme"
       title="Toggle theme"
+      className="btn"
       style={{
-        padding: "8px 10px",
-        borderRadius: 8,
-        border: "1px solid rgba(255,255,255,0.04)",
-        background: "transparent",
-        color: "var(--muted)",
-        cursor: "pointer",
+        padding: "8px 12px",
+        fontSize: 14,
         fontWeight: 700,
-        ...style,
       }}
     >
-      {theme === "light" ? "🌤️ Light Mode" : "🌙 Night Mode"}
+      {theme === "light" ? "🌞 Light" : "🌙 Dark"}
     </button>
   );
 }

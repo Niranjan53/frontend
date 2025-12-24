@@ -42,185 +42,196 @@ export default function Profile() {
   };
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        width: "100%",
-        background: "var(--bg)",
-        padding: "48px 20px",
-        fontFamily: "'Inter', 'Poppins', sans-serif",
-        display: "flex",
-        justifyContent: "center",
-        boxSizing: "border-box",
-        color: "var(--text)",
-      }}
-    >
-      <div
-        style={{
-          width: "100%",
-          maxWidth: 640,
-          background: "var(--card)",
-          borderRadius: 28,
-          boxShadow: "0 16px 40px rgba(0,0,0,0.6)",
-          border: "1px solid var(--border)",
-          overflow: "hidden",
-        }}
-      >
+    <div style={page}>
+      <div style={card}>
         {/* HEADER */}
-        <div
-          style={{
-            padding: "36px 32px",
-            background:
-              "linear-gradient(135deg, rgba(156,163,255,0.18), rgba(99,102,241,0.12))",
-          }}
-        >
-          <h2 style={{ fontSize: 30, fontWeight: 800, marginBottom: 6 }}>
-            My Profile
-          </h2>
-          <p style={{ color: "var(--muted)" }}>
-            Manage your personal information and visibility
-          </p>
+        <div style={header}>
+          <h1 style={title}>My Profile</h1>
+          <p style={subtitle}>Manage your information and privacy</p>
         </div>
 
-        {/* BODY */}
-        <div style={{ padding: 32 }}>
-          {/* AVATAR + INFO */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 24,
-              marginBottom: 32,
-              flexWrap: "wrap",
-            }}
-          >
-            <div
-              onClick={() => fileInputRef.current.click()}
-              className="profile-avatar"
-              style={{
-                width: 120,
-                height: 120,
-                borderRadius: "50%",
-                background: "rgba(156,163,175,0.06)",
-                border: "4px solid var(--border)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                overflow: "hidden",
-              }}
-              title="Click to upload photo"
-            >
-              {photo ? (
-                <img
-                  src={photo}
-                  alt="profile"
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              ) : (
-                <span style={{ fontWeight: 700, color: "var(--accent)" }}>
-                  ADD PHOTO
-                </span>
-              )}
-            </div>
+        {/* AVATAR */}
+        <div
+          style={avatarWrapper}
+          onClick={() => fileInputRef.current.click()}
+        >
+          {photo ? (
+            <img src={photo} alt="profile" style={avatarImg} />
+          ) : (
+            <span style={avatarText}>UPLOAD PHOTO</span>
+          )}
+        </div>
 
-            <div>
-              <h3 style={{ marginBottom: 4, fontWeight: 700 }}>
-                {profile.name}
-              </h3>
-              <p style={{ fontSize: 14, color: "var(--muted)" }}>
-                {profile.email}
-              </p>
-            </div>
+        <h2 style={name}>{profile.name}</h2>
+        <p style={email}>{profile.email}</p>
 
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              onChange={handleImageUpload}
-              style={{ display: "none" }}
-            />
-          </div>
+        <input
+          type="file"
+          ref={fileInputRef}
+          accept="image/*"
+          onChange={handleImageUpload}
+          style={{ display: "none" }}
+        />
 
-          {/* BIO */}
-          <label style={{ fontWeight: 600, marginBottom: 6, display: "block" }}>
-            Bio
-          </label>
+        {/* BIO */}
+        <div style={{ marginTop: 32 }}>
+          <label style={label}>Bio</label>
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            placeholder="Tell others about yourself..."
-            style={{
-              width: "100%",
-              minHeight: 120,
-              padding: 14,
-              borderRadius: 14,
-              background: "transparent",
-              border: "1px solid rgba(255,255,255,0.06)",
-              color: "var(--text)",
-              marginBottom: 24,
-            }}
+            placeholder="Tell the community about yourself..."
+            style={textarea}
           />
+        </div>
 
-          {/* PRIVACY */}
-          <div
-            style={{
-              padding: 16,
-              borderRadius: 14,
-              background: "rgba(255,255,255,0.04)",
-              marginBottom: 32,
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
+        {/* PRIVACY */}
+        <div style={privacyBox}>
+          <label style={privacyLabel}>
             <input
               type="checkbox"
               checked={isPrivate}
               onChange={(e) => setIsPrivate(e.target.checked)}
-              style={{ width: 18, height: 18 }}
+              style={checkbox}
             />
-            <div>
-              <strong>
-                {isPrivate ? "Private Profile" : "Public Profile"}
-              </strong>
-              <p style={{ fontSize: 13, color: "var(--muted)" }}>
-                {isPrivate
-                  ? "Only you can see your profile"
-                  : "Visible to community members"}
-              </p>
-            </div>
-          </div>
-
-          {/* SAVE */}
-          <button
-            onClick={updateProfile}
-            style={{
-              width: "100%",
-              padding: 16,
-              borderRadius: 16,
-              background: "var(--accent)",
-              color: "#0b0b0b",
-              fontWeight: 800,
-              fontSize: 16,
-              border: "none",
-              cursor: "pointer",
-              boxShadow: "0 12px 40px rgba(0,0,0,0.7)",
-            }}
-          >
-            Save Changes
-          </button>
+            <span>
+              {isPrivate ? "Private Profile" : "Public Profile"}
+            </span>
+          </label>
+          <small style={privacyText}>
+            {isPrivate
+              ? "Only you can view your profile"
+              : "Visible to all community members"}
+          </small>
         </div>
-      </div>
 
-      <style>
-        {`
-          .profile-avatar:hover {
-            transform: scale(1.05);
-            box-shadow: 0 16px 32px rgba(79,70,229,0.15);
-          }
-        `}
-      </style>
+        {/* SAVE */}
+        <button style={saveBtn} onClick={updateProfile}>
+          Save Changes
+        </button>
+      </div>
     </div>
   );
 }
+
+/* ================= STYLES ================= */
+
+const page = {
+  minHeight: "100vh",
+  background:
+    "radial-gradient(circle at top, #7c3aed 0%, #020617 60%)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: 24,
+  fontFamily: "Inter, sans-serif",
+};
+
+const card = {
+  width: "100%",
+  maxWidth: 520,
+  background: "rgba(255,255,255,0.06)",
+  borderRadius: 28,
+  padding: 44,
+  border: "1px solid rgba(255,255,255,0.1)",
+  backdropFilter: "blur(16px)",
+  color: "#e5e7eb",
+  textAlign: "center",
+};
+
+const header = { marginBottom: 24 };
+
+const title = {
+  fontSize: 34,
+  fontWeight: 900,
+};
+
+const subtitle = {
+  color: "#94a3b8",
+  fontSize: 15,
+};
+
+const avatarWrapper = {
+  width: 130,
+  height: 130,
+  borderRadius: "50%",
+  background: "linear-gradient(135deg,#a78bfa,#7c3aed)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  cursor: "pointer",
+  margin: "24px auto",
+  overflow: "hidden",
+};
+
+const avatarImg = {
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+};
+
+const avatarText = {
+  color: "#020617",
+  fontWeight: 900,
+  fontSize: 13,
+};
+
+const name = {
+  fontSize: 22,
+  fontWeight: 800,
+};
+
+const email = {
+  color: "#94a3b8",
+  fontSize: 14,
+};
+
+const label = {
+  display: "block",
+  textAlign: "left",
+  marginBottom: 8,
+  fontWeight: 700,
+};
+
+const textarea = {
+  width: "100%",
+  minHeight: 120,
+  padding: 14,
+  borderRadius: 14,
+  background: "transparent",
+  border: "1px solid rgba(255,255,255,0.15)",
+  color: "#fff",
+  resize: "none",
+};
+
+const privacyBox = {
+  marginTop: 28,
+  padding: 16,
+  borderRadius: 16,
+  background: "rgba(255,255,255,0.04)",
+};
+
+const privacyLabel = {
+  display: "flex",
+  alignItems: "center",
+  gap: 10,
+  fontWeight: 700,
+};
+
+const checkbox = { width: 18, height: 18 };
+
+const privacyText = {
+  fontSize: 12,
+  color: "#94a3b8",
+};
+
+const saveBtn = {
+  width: "100%",
+  marginTop: 28,
+  padding: "14px",
+  borderRadius: 18,
+  background: "linear-gradient(135deg,#a78bfa,#7c3aed)",
+  color: "#020617",
+  fontWeight: 900,
+  border: "none",
+  cursor: "pointer",
+};

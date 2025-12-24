@@ -13,171 +13,151 @@ export default function MemberDirectory() {
 
   const filtered = members.filter(
     (m) =>
-      m.name.toLowerCase().includes(search.toLowerCase()) ||
-      m.email.toLowerCase().includes(search.toLowerCase())
+      m.name?.toLowerCase().includes(search.toLowerCase()) ||
+      m.email?.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        width: "100%",
-        padding: "40px 32px",
-        backgroundColor: "var(--bg)",
-        fontFamily: "'Inter', 'Poppins', sans-serif",
-        boxSizing: "border-box",
-        color: "var(--text)",
-      }}
-    >
-      <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-        {/* HEADER */}
-        <header style={{ marginBottom: "32px" }}>
-          <h2
-            style={{
-              fontSize: "32px",
-              fontWeight: 800,
-              marginBottom: "8px",
-            }}
-          >
-            Member Directory
-          </h2>
-          <p style={{ color: "var(--muted)" }}>
-            Connect with other members in the community
-          </p>
-        </header>
+    <div style={page}>
+      {/* HEADER */}
+      <div style={header}>
+        <h1 style={title}>Community Members</h1>
+        <p style={subtitle}>
+          Discover and connect with people in the community
+        </p>
 
-        {/* SEARCH */}
-        <div
-          style={{
-            position: "relative",
-            marginBottom: "40px",
-            maxWidth: "500px",
-          }}
-        >
-          <input
-            placeholder="Search by name or email..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: "100%",
-              padding: "14px 20px",
-              borderRadius: "12px",
-              border: "1px solid rgba(255,255,255,0.06)",
-              fontSize: "15px",
-              outline: "none",
-              background: "transparent",
-              color: "var(--text)",
-              transition: "all 0.2s ease",
-            }}
-            onFocus={(e) => {
-              e.target.style.border = "1px solid var(--accent)";
-              e.target.style.boxShadow =
-                "0 0 0 6px rgba(156,163,255,0.06)";
-            }}
-            onBlur={(e) => {
-              e.target.style.border =
-                "1px solid rgba(255,255,255,0.06)";
-              e.target.style.boxShadow = "none";
-            }}
-          />
-        </div>
-
-        {/* MEMBERS GRID */}
-        {filtered.length === 0 ? (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "60px",
-              color: "var(--muted)",
-              background: "var(--card)",
-              borderRadius: "16px",
-              border: "1px solid var(--border)",
-            }}
-          >
-            No members match your search criteria.
-          </div>
-        ) : (
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-              gap: "24px",
-            }}
-          >
-            {filtered.map((m) => (
-              <div
-                key={m._id}
-                className="member-card hover-card"
-                style={{
-                  background: "var(--card)",
-                  padding: "24px",
-                  borderRadius: "20px",
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
-                  border: "1px solid var(--border)",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "16px",
-                  transition: "transform 0.2s",
-                }}
-              >
-                {/* AVATAR */}
-                <div
-                  style={{
-                    width: "50px",
-                    height: "50px",
-                    borderRadius: "50%",
-                    backgroundColor: "rgba(156,163,175,0.06)",
-                    color: "var(--accent)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 700,
-                    fontSize: "18px",
-                    flexShrink: 0,
-                  }}
-                >
-                  {m.name.charAt(0).toUpperCase()}
-                </div>
-
-                {/* INFO */}
-                <div style={{ overflow: "hidden" }}>
-                  <h4
-                    style={{
-                      margin: "0 0 4px 0",
-                      fontSize: "17px",
-                      fontWeight: 700,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {m.name}
-                  </h4>
-                  <p
-                    style={{
-                      margin: 0,
-                      color: "var(--muted)",
-                      fontSize: "13px",
-                      wordBreak: "break-all",
-                    }}
-                  >
-                    {m.email}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <input
+          placeholder="Search by name or email..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={searchInput}
+        />
       </div>
 
-      <style>
-        {`
-          .member-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-          }
-        `}
-      </style>
+      {/* GRID */}
+      {filtered.length === 0 ? (
+        <div style={empty}>No members found</div>
+      ) : (
+        <div style={grid}>
+          {filtered.map((m) => (
+            <div key={m._id} style={card}>
+              <div style={avatar}>
+                {m.name?.charAt(0).toUpperCase()}
+              </div>
+
+              <div style={info}>
+                <h3 style={name}>{m.name}</h3>
+                <p style={email}>{m.email}</p>
+              </div>
+
+              <button style={viewBtn}>View Profile</button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+
+/* ================= STYLES ================= */
+
+const page = {
+  minHeight: "100vh",
+  background:
+    "radial-gradient(circle at top, #7c3aed 0%, #020617 60%)",
+  padding: "64px 24px",
+  fontFamily: "Inter, sans-serif",
+  color: "#e5e7eb",
+};
+
+const header = {
+  maxWidth: 1200,
+  margin: "0 auto 56px",
+  textAlign: "center",
+};
+
+const title = {
+  fontSize: 40,
+  fontWeight: 900,
+};
+
+const subtitle = {
+  color: "#94a3b8",
+  fontSize: 16,
+  marginTop: 8,
+};
+
+const searchInput = {
+  marginTop: 24,
+  width: "100%",
+  maxWidth: 420,
+  padding: "14px 18px",
+  borderRadius: 999,
+  background: "rgba(255,255,255,0.06)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "#fff",
+  outline: "none",
+};
+
+const grid = {
+  maxWidth: 1200,
+  margin: "0 auto",
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))",
+  gap: 28,
+};
+
+const card = {
+  background: "rgba(255,255,255,0.05)",
+  borderRadius: 22,
+  padding: 28,
+  textAlign: "center",
+  border: "1px solid rgba(255,255,255,0.1)",
+  boxShadow: "0 20px 40px rgba(0,0,0,0.6)",
+  transition: "transform .2s ease, box-shadow .2s ease",
+};
+
+const avatar = {
+  width: 72,
+  height: 72,
+  borderRadius: "50%",
+  background: "linear-gradient(135deg,#a78bfa,#7c3aed)",
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  fontSize: 28,
+  fontWeight: 900,
+  color: "#020617",
+  margin: "0 auto 18px",
+};
+
+const info = {
+  marginBottom: 18,
+};
+
+const name = {
+  fontSize: 18,
+  fontWeight: 800,
+};
+
+const email = {
+  fontSize: 13,
+  color: "#94a3b8",
+  wordBreak: "break-all",
+};
+
+const viewBtn = {
+  padding: "10px 20px",
+  borderRadius: 999,
+  background: "rgba(124,58,237,0.2)",
+  color: "#c7d2fe",
+  border: "none",
+  fontWeight: 700,
+  cursor: "pointer",
+};
+
+const empty = {
+  textAlign: "center",
+  color: "#94a3b8",
+  padding: 80,
+};

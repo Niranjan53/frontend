@@ -2,184 +2,150 @@ import { useEffect, useState } from "react";
 import api from "../../api/api";
 
 export default function AdminDashboard() {
-  const [newsletterSubject, setNewsletterSubject] = useState("");
-  const [newsletterContent, setNewsletterContent] = useState("");
-  const [newsletterSendMsg, setNewsletterSendMsg] = useState("");
-  const [newsletterSending, setNewsletterSending] = useState(false);
-
-  const [users, setUsers] = useState([]);
-  const [blogs, setBlogs] = useState([]);
   const [stats, setStats] = useState({});
   const [advancedStats, setAdvancedStats] = useState({});
   const [newsletterStats, setNewsletterStats] = useState({});
-  const [userSearch, setUserSearch] = useState("");
+  const [blogs, setBlogs] = useState([]);
   const [blogSearch, setBlogSearch] = useState("");
 
-  /* ================= LOAD DATA ================= */
+  const [newsletterSubject, setNewsletterSubject] = useState("");
+  const [newsletterContent, setNewsletterContent] = useState("");
+  const [sending, setSending] = useState(false);
+  const [message, setMessage] = useState("");
+
   useEffect(() => {
-    api.get("/admin/users").then((res) => setUsers(res.data || []));
-    api.get("/admin/blogs").then((res) => setBlogs(res.data || []));
-    api.get("/admin/stats").then((res) => setStats(res.data || {}));
-    api.get("/admin/stats/advanced").then((res) => setAdvancedStats(res.data || {}));
-    api.get("/newsletter/stats/subscribers").then((res) => setNewsletterStats(res.data || {}));
+    api.get("/admin/stats").then(res => setStats(res.data || {}));
+    api.get("/admin/stats/advanced").then(res => setAdvancedStats(res.data || {}));
+    api.get("/newsletter/stats/subscribers").then(res => setNewsletterStats(res.data || {}));
+    api.get("/admin/blogs").then(res => setBlogs(res.data || []));
   }, []);
 
-  /* ================= ACTIONS ================= */
-  const deleteUser = async (id) => {
-    if (window.confirm("Delete this user?")) {
-      await api.delete(`/admin/users/${id}`);
-      setUsers(users.filter((u) => u._id !== id));
+  /* ================= NEWSLETTER ================= */
+  const sendNewsletter = async (e) => {
+    e.preventDefault();
+    setSending(true);
+    setMessage("");
+
+    try {
+      await api.post("/newsletter/send", {
+        subject: newsletterSubject,
+        content: newsletterContent,
+      });
+      setMessage("Newsletter sent successfully");
+      setNewsletterSubject("");
+      setNewsletterContent("");
+    } catch {
+      setMessage("Failed to send newsletter");
+    } finally {
+      setSending(false);
+    }
+  };
+
+  /* ================= BLOG ACTIONS ================= */
+  const approveBlog = async (id) => {
+    if (window.confirm("Approve this blog?")) {
+      await api.put(`/admin/blogs/${id}/approve`);
+      setBlogs(
+        blogs.map(b =>
+          b._id === id ? { ...b, approved: true } : b
+        )
+      );
     }
   };
 
   const deleteBlog = async (id) => {
     if (window.confirm("Delete this blog?")) {
       await api.delete(`/admin/blogs/${id}`);
-      setBlogs(blogs.filter((b) => b._id !== id));
+      setBlogs(blogs.filter(b => b._id !== id));
     }
   };
-
-  const approveBlog = async (id) => {
-    if (window.confirm("Approve this blog?")) {
-      await api.put(`/admin/blogs/${id}/approve`);
-      setBlogs(blogs.map((b) => (b._id === id ? { ...b, approved: true } : b)));
-    }
-  };
-
-  const promoteToAdmin = async (id) => {
-    if (window.confirm("Promote this user to admin?")) {
-      await api.put(`/admin/users/${id}/role`, { role: "admin" });
-      setUsers(users.map((u) => (u._id === id ? { ...u, role: "admin" } : u)));
-    }
-  };
-
-  /* ================= FILTERS ================= */
-  const filteredUsers = users.filter(
-    (u) =>
-      u.name?.toLowerCase().includes(userSearch.toLowerCase()) ||
-      u.email?.toLowerCase().includes(userSearch.toLowerCase())
-  );
 
   const filteredBlogs = blogs.filter(
-    (b) =>
+    b =>
       b.title?.toLowerCase().includes(blogSearch.toLowerCase()) ||
       b.author?.name?.toLowerCase().includes(blogSearch.toLowerCase())
   );
 
-  /* ================= UI ================= */
   return (
     <div style={page}>
-      <div style={container}>
+      <div style={card}>
 
         {/* HEADER */}
-        <header style={header}>
-          <h1 style={title}>Admin Dashboard</h1>
-          <p style={subtitle}>Manage users, blogs, and newsletters</p>
-        </header>
+        <h1 style={title}>Admin Dashboard</h1>
+        <p style={subtitle}>Platform control & analytics</p>
 
         {/* STATS */}
         <div style={statsGrid}>
-          <Metric label="Users" value={stats.totalUsers} />
-          <Metric label="Blogs" value={stats.totalBlogs} />
-          <Metric label="Subscribers" value={newsletterStats.count} />
-          <Metric label="Comments" value={advancedStats.totalComments} />
+          <Stat label="Users" value={stats.totalUsers} />
+          <Stat label="Blogs" value={stats.totalBlogs} />
+          <Stat label="Subscribers" value={newsletterStats.count} />
+          <Stat label="Comments" value={advancedStats.totalComments} />
         </div>
 
         {/* NEWSLETTER */}
-        <section style={card}>
-          <h2 style={sectionTitle}>Send Newsletter</h2>
+        <Section title="📢 Send Newsletter">
+          <form onSubmit={sendNewsletter}>
+            <input
+              placeholder="Newsletter subject"
+              value={newsletterSubject}
+              onChange={(e) => setNewsletterSubject(e.target.value)}
+              style={input}
+              required
+            />
+            <textarea
+              placeholder="Write newsletter content..."
+              rows={4}
+              value={newsletterContent}
+              onChange={(e) => setNewsletterContent(e.target.value)}
+              style={{ ...input, marginTop: 14 }}
+              required
+            />
+            <button style={button} disabled={sending}>
+              {sending ? "Sending..." : "Send Newsletter"}
+            </button>
+            {message && <p style={msg}>{message}</p>}
+          </form>
+        </Section>
 
+        {/* BLOG MANAGEMENT */}
+        <Section title="📝 Manage Blogs">
           <input
-            placeholder="Newsletter subject"
-            value={newsletterSubject}
-            onChange={(e) => setNewsletterSubject(e.target.value)}
+            placeholder="Search blogs..."
+            value={blogSearch}
+            onChange={(e) => setBlogSearch(e.target.value)}
             style={input}
           />
 
-          <textarea
-            placeholder="Write newsletter content..."
-            rows={5}
-            value={newsletterContent}
-            onChange={(e) => setNewsletterContent(e.target.value)}
-            style={{ ...input, marginTop: 12 }}
-          />
+          <div style={{ marginTop: 20, display: "grid", gap: 14 }}>
+            {filteredBlogs.length === 0 && (
+              <p style={{ color: "#c4b5fd" }}>No blogs found</p>
+            )}
 
-          <button
-            style={primaryBtn}
-            disabled={newsletterSending}
-            onClick={(e) => {
-              e.preventDefault();
-              setNewsletterSending(true);
-              api
-                .post("/newsletter/send", {
-                  subject: newsletterSubject,
-                  content: newsletterContent,
-                })
-                .then((res) => {
-                  setNewsletterSendMsg(res.data.message || "Newsletter sent");
-                  setNewsletterSubject("");
-                  setNewsletterContent("");
-                })
-                .catch(() => setNewsletterSendMsg("Failed to send"))
-                .finally(() => setNewsletterSending(false));
-            }}
-          >
-            {newsletterSending ? "Sending..." : "Send Newsletter"}
-          </button>
+            {filteredBlogs.map((b) => (
+              <div key={b._id} style={blogItem}>
+                <div>
+                  <strong>{b.title}</strong>
+                  <div style={blogMeta}>
+                    By {b.author?.name || "Member"} ·{" "}
+                    {b.approved ? "Approved" : "Pending"}
+                  </div>
+                </div>
 
-          {newsletterSendMsg && <p style={muted}>{newsletterSendMsg}</p>}
-        </section>
+                <div style={{ display: "flex", gap: 10 }}>
+                  {!b.approved && (
+                    <button style={smallBtn} onClick={() => approveBlog(b._id)}>
+                      Approve
+                    </button>
+                  )}
+                  <button style={dangerBtn} onClick={() => deleteBlog(b._id)}>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Section>
 
-        {/* MANAGEMENT */}
-        <div style={twoCol}>
-          {/* USERS */}
-          <section style={card}>
-            <h2 style={sectionTitle}>Users</h2>
-            <input
-              placeholder="Search users..."
-              value={userSearch}
-              onChange={(e) => setUserSearch(e.target.value)}
-              style={input}
-            />
-            <div style={list}>
-              {filteredUsers.map((u) => (
-                <Row
-                  key={u._id}
-                  title={u.name}
-                  subtitle={u.email}
-                  badge={u.role}
-                  onDelete={() => deleteUser(u._id)}
-                  onAction={u.role !== "admin" ? () => promoteToAdmin(u._id) : null}
-                  actionLabel="Promote"
-                />
-              ))}
-            </div>
-          </section>
-
-          {/* BLOGS */}
-          <section style={card}>
-            <h2 style={sectionTitle}>Blogs</h2>
-            <input
-              placeholder="Search blogs..."
-              value={blogSearch}
-              onChange={(e) => setBlogSearch(e.target.value)}
-              style={input}
-            />
-            <div style={list}>
-              {filteredBlogs.map((b) => (
-                <Row
-                  key={b._id}
-                  title={b.title}
-                  subtitle={`By ${b.author?.name || "Member"}`}
-                  badge={b.approved ? "Approved" : "Pending"}
-                  onDelete={() => deleteBlog(b._id)}
-                  onAction={!b.approved ? () => approveBlog(b._id) : null}
-                  actionLabel="Approve"
-                />
-              ))}
-            </div>
-          </section>
-        </div>
       </div>
     </div>
   );
@@ -187,27 +153,20 @@ export default function AdminDashboard() {
 
 /* ================= COMPONENTS ================= */
 
-function Metric({ label, value }) {
+function Stat({ label, value }) {
   return (
-    <div style={metric}>
-      <p style={muted}>{label}</p>
-      <h2 style={{ fontSize: 36, fontWeight: 900 }}>{value || 0}</h2>
+    <div style={statCard}>
+      <span style={statLabel}>{label}</span>
+      <h2 style={statValue}>{value || 0}</h2>
     </div>
   );
 }
 
-function Row({ title, subtitle, badge, onDelete, onAction, actionLabel }) {
+function Section({ title, children }) {
   return (
-    <div style={row}>
-      <div>
-        <strong>{title}</strong>
-        <div style={muted}>{subtitle}</div>
-        <span style={badgeStyle}>{badge}</span>
-      </div>
-      <div style={{ display: "flex", gap: 8 }}>
-        {onAction && <button style={ghostBtn} onClick={onAction}>{actionLabel}</button>}
-        <button style={dangerBtn} onClick={onDelete}>Delete</button>
-      </div>
+    <div style={section}>
+      <h2 style={sectionTitle}>{title}</h2>
+      {children}
     </div>
   );
 }
@@ -216,103 +175,120 @@ function Row({ title, subtitle, badge, onDelete, onAction, actionLabel }) {
 
 const page = {
   minHeight: "100vh",
-  background: "linear-gradient(135deg,#020617,#0b1220)",
-  color: "#e5e7eb",
-  padding: "64px 24px",
-  fontFamily: "Inter, sans-serif",
-};
-
-const container = { maxWidth: 1300, margin: "0 auto" };
-const header = { marginBottom: 48 };
-const title = { fontSize: 44, fontWeight: 900 };
-const subtitle = { color: "#94a3b8", fontSize: 16 };
-
-const statsGrid = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
-  gap: 24,
-  marginBottom: 56,
-};
-
-const metric = {
-  background: "rgba(255,255,255,0.04)",
-  padding: 28,
-  borderRadius: 22,
-  border: "1px solid rgba(255,255,255,0.06)",
+  background:
+    "radial-gradient(1200px 600px at top, #7c3aed 0%, #020617 60%)",
+  display: "flex",
+  justifyContent: "center",
+  padding: "40px 20px",
+  fontFamily: "'Inter', sans-serif",
 };
 
 const card = {
-  background: "rgba(255,255,255,0.04)",
-  padding: 32,
-  borderRadius: 24,
-  border: "1px solid rgba(255,255,255,0.06)",
+  width: "100%",
+  maxWidth: 900,
+  background: "rgba(124,58,237,0.18)",
+  borderRadius: 28,
+  padding: "48px 40px",
+  boxShadow: "0 30px 80px rgba(0,0,0,0.6)",
+  border: "1px solid rgba(255,255,255,0.12)",
+  backdropFilter: "blur(14px)",
+  color: "#e5e7eb",
+};
+
+const title = {
+  fontSize: 36,
+  fontWeight: 900,
+  textAlign: "center",
+};
+
+const subtitle = {
+  textAlign: "center",
+  color: "#c4b5fd",
   marginBottom: 40,
 };
 
-const sectionTitle = { fontSize: 24, fontWeight: 800, marginBottom: 18 };
+const statsGrid = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit, minmax(140px,1fr))",
+  gap: 20,
+  marginBottom: 48,
+};
+
+const statCard = {
+  background: "rgba(255,255,255,0.08)",
+  borderRadius: 18,
+  padding: 22,
+  textAlign: "center",
+};
+
+const statLabel = { fontSize: 14, color: "#ddd6fe" };
+const statValue = { fontSize: 32, fontWeight: 900 };
+
+const section = {
+  background: "rgba(2,6,23,0.55)",
+  borderRadius: 20,
+  padding: 28,
+  marginBottom: 40,
+};
+
+const sectionTitle = {
+  fontSize: 24,
+  fontWeight: 800,
+  marginBottom: 18,
+};
 
 const input = {
   width: "100%",
-  padding: "12px 14px",
-  borderRadius: 12,
-  border: "1px solid rgba(255,255,255,0.08)",
-  background: "transparent",
+  padding: "14px 16px",
+  borderRadius: 14,
+  border: "1px solid rgba(255,255,255,0.2)",
+  background: "rgba(2,6,23,0.6)",
   color: "#e5e7eb",
-  marginBottom: 12,
+  outline: "none",
 };
 
-const primaryBtn = {
-  marginTop: 10,
-  padding: "14px 18px",
+const button = {
+  marginTop: 18,
+  width: "100%",
+  padding: "14px",
   borderRadius: 14,
-  background: "linear-gradient(135deg,#6366f1,#22d3ee)",
+  background: "linear-gradient(135deg,#a78bfa,#7c3aed)",
   color: "#020617",
   fontWeight: 900,
   border: "none",
   cursor: "pointer",
 };
 
-const twoCol = {
-  display: "grid",
-  gridTemplateColumns: "1fr 1fr",
-  gap: 32,
-};
+const msg = { marginTop: 12, textAlign: "center", color: "#a5b4fc" };
 
-const list = { display: "grid", gap: 12 };
-
-const row = {
-  background: "rgba(255,255,255,0.03)",
-  padding: 16,
-  borderRadius: 16,
+const blogItem = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  border: "1px solid rgba(255,255,255,0.06)",
+  background: "rgba(255,255,255,0.08)",
+  padding: 16,
+  borderRadius: 16,
 };
 
-const badgeStyle = {
-  display: "inline-block",
-  fontSize: 12,
-  marginTop: 4,
-  color: "#a5b4fc",
+const blogMeta = {
+  fontSize: 13,
+  color: "#c4b5fd",
 };
 
-const ghostBtn = {
-  padding: "6px 12px",
-  borderRadius: 8,
-  background: "transparent",
-  border: "1px solid rgba(255,255,255,0.12)",
-  color: "#c7d2fe",
+const smallBtn = {
+  padding: "8px 12px",
+  borderRadius: 10,
+  border: "none",
+  fontWeight: 700,
+  background: "#4ade80",
   cursor: "pointer",
 };
 
 const dangerBtn = {
-  padding: "6px 12px",
-  borderRadius: 8,
-  background: "#ef4444",
+  padding: "8px 12px",
+  borderRadius: 10,
   border: "none",
-  color: "#fff",
+  fontWeight: 700,
+  background: "#f87171",
   cursor: "pointer",
 };
-
-const muted = { color: "#94a3b8", fontSize: 13 };

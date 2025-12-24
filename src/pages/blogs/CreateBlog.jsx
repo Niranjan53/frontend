@@ -1,6 +1,6 @@
 import { useState } from "react";
-import api from "../../api/api";
 import { useNavigate } from "react-router-dom";
+import api from "../../api/api";
 
 export default function CreateBlog() {
   const [title, setTitle] = useState("");
@@ -9,187 +9,181 @@ export default function CreateBlog() {
   const navigate = useNavigate();
 
   const submit = async () => {
+    if (!title || !content) {
+      alert("Title and content are required");
+      return;
+    }
+
     try {
       await api.post("/blogs", { title, content, status });
       navigate("/blogs");
     } catch {
-      alert("Error saving blog. Please try again.");
+      alert("Failed to create blog");
     }
   };
 
-  const inputBaseStyle = {
-    width: "100%",
-    padding: "14px 16px",
-    marginBottom: "20px",
-    borderRadius: "12px",
-    border: "1px solid rgba(255,255,255,0.06)",
-    fontSize: "15px",
-    outline: "none",
-    transition: "all 0.2s ease",
-    boxSizing: "border-box",
-    fontFamily: "'Inter', sans-serif",
-    background: "transparent",
-    color: "var(--text)",
-  };
-
-  const labelStyle = {
-    display: "block",
-    marginBottom: "8px",
-    fontSize: "14px",
-    fontWeight: 600,
-    color: "var(--muted)",
-  };
-
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        width: "100%",
-        backgroundColor: "var(--bg)",
-        padding: "40px 20px",
-        fontFamily: "'Inter', 'Poppins', sans-serif",
-        display: "flex",
-        justifyContent: "center",
-        boxSizing: "border-box",
-        color: "var(--text)",
-      }}
-    >
-      <div
-        className="hover-card"
-        style={{
-          width: "100%",
-          maxWidth: "800px",
-          background: "var(--card)",
-          padding: "40px",
-          borderRadius: "24px",
-          boxShadow: "0 10px 30px rgba(0,0,0,0.6)",
-          border: "1px solid var(--border)",
-        }}
-      >
+    <div style={page}>
+      <div style={editorCard}>
         {/* HEADER */}
-        <div style={{ marginBottom: "32px" }}>
-          <h2
-            style={{
-              margin: "0 0 8px 0",
-              fontSize: "30px",
-              fontWeight: 800,
-            }}
-          >
-            New Blog Post
-          </h2>
-          <p style={{ color: "var(--muted)", margin: 0 }}>
-            Share your ideas and insights with the community
+        <div style={header}>
+          <h1 style={heading}>Write a New Blog</h1>
+          <p style={subHeading}>
+            Share your knowledge, ideas, and experiences with the community
           </p>
         </div>
 
         {/* TITLE */}
-        <label style={labelStyle}>Headline</label>
         <input
-          className="blog-input"
-          placeholder="e.g., The Future of Reinforcement Learning"
+          placeholder="Blog title..."
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          required
-          style={inputBaseStyle}
+          style={titleInput}
         />
 
         {/* STATUS */}
-        <label style={labelStyle}>Visibility</label>
-        <select
-          value={status}
-          onChange={(e) => setStatus(e.target.value)}
-          style={{
-            ...inputBaseStyle,
-            appearance: "none",
-          }}
-        >
-          <option value="draft">Save as Draft (Private)</option>
-          <option value="published">Publish (Public)</option>
-        </select>
+        <div style={metaRow}>
+          <label style={label}>Visibility</label>
+          <select
+            value={status}
+            onChange={(e) => setStatus(e.target.value)}
+            style={select}
+          >
+            <option value="draft">Draft (Private)</option>
+            <option value="published">Publish (Public)</option>
+          </select>
+        </div>
 
         {/* CONTENT */}
-        <label style={labelStyle}>Content</label>
         <textarea
-          className="blog-input"
-          placeholder="Start writing your story here..."
+          placeholder="Start writing your blog here..."
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          required
-          rows={12}
-          style={{
-            ...inputBaseStyle,
-            resize: "vertical",
-            lineHeight: 1.7,
-            minHeight: "220px",
-            fontWeight: 500,
-          }}
+          style={contentBox}
         />
 
-        {/* ACTION BUTTONS */}
-        <div style={{ display: "flex", gap: "16px", marginTop: "10px" }}>
-          <button
-            onClick={submit}
-            style={{
-              padding: "14px 28px",
-              borderRadius: "12px",
-              border: "1px solid rgba(255,255,255,0.04)",
-              backgroundColor: "var(--accent)",
-              color: "#0b0b0b",
-              fontWeight: 700,
-              fontSize: "16px",
-              cursor: "pointer",
-              boxShadow: "0 8px 24px rgba(0,0,0,0.6)",
-              flex: 2,
-              transition: "transform 0.18s, box-shadow 0.18s",
-            }}
-            onMouseOver={(e) => {
-              e.target.style.transform = "scale(1.04)";
-              e.target.style.boxShadow =
-                "0 12px 40px rgba(0,0,0,0.7)";
-            }}
-            onMouseOut={(e) => {
-              e.target.style.transform = "scale(1)";
-              e.target.style.boxShadow =
-                "0 8px 24px rgba(0,0,0,0.6)";
-            }}
-          >
-            {status === "published" ? "Publish Post" : "Save Draft"}
+        {/* ACTIONS */}
+        <div style={actions}>
+          <button onClick={submit} style={publishBtn}>
+            {status === "published" ? "Publish Blog" : "Save Draft"}
           </button>
 
           <button
             onClick={() => navigate("/blogs")}
-            style={{
-              padding: "14px 28px",
-              borderRadius: "12px",
-              border: "1px solid rgba(255,255,255,0.04)",
-              backgroundColor: "transparent",
-              color: "var(--muted)",
-              fontWeight: 700,
-              fontSize: "16px",
-              cursor: "pointer",
-              flex: 1,
-            }}
+            style={cancelBtn}
           >
             Cancel
           </button>
         </div>
       </div>
-
-      <style>
-        {`
-          .blog-input:focus {
-            border-color: var(--accent) !important;
-            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
-          }
-
-          @media (max-width: 600px) {
-            .blog-input {
-              font-size: 14px !important;
-              padding: 10px 12px !important;
-            }
-          }
-        `}
-      </style>
     </div>
   );
 }
+
+/* ================= STYLES ================= */
+
+const page = {
+  minHeight: "100vh",
+  background:
+    "radial-gradient(circle at top, #7c3aed 0%, #020617 55%)",
+  display: "flex",
+  justifyContent: "center",
+  padding: "64px 20px",
+  fontFamily: "Inter, sans-serif",
+  color: "#e5e7eb",
+};
+
+const editorCard = {
+  width: "100%",
+  maxWidth: 900,
+  background: "rgba(255,255,255,0.06)",
+  borderRadius: 28,
+  padding: 42,
+  border: "1px solid rgba(255,255,255,0.1)",
+  boxShadow: "0 25px 60px rgba(0,0,0,0.6)",
+};
+
+const header = {
+  marginBottom: 32,
+};
+
+const heading = {
+  fontSize: 36,
+  fontWeight: 900,
+};
+
+const subHeading = {
+  color: "#94a3b8",
+  fontSize: 15,
+};
+
+const titleInput = {
+  width: "100%",
+  padding: "18px 20px",
+  borderRadius: 18,
+  fontSize: 26,
+  fontWeight: 800,
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "#fff",
+  marginBottom: 24,
+};
+
+const metaRow = {
+  display: "flex",
+  alignItems: "center",
+  gap: 16,
+  marginBottom: 24,
+};
+
+const label = {
+  fontWeight: 700,
+  color: "#c7d2fe",
+};
+
+const select = {
+  padding: "10px 14px",
+  borderRadius: 12,
+  background: "rgba(255,255,255,0.05)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "#e5e7eb",
+};
+
+const contentBox = {
+  width: "100%",
+  minHeight: 300,
+  padding: 20,
+  fontSize: 16,
+  lineHeight: 1.7,
+  borderRadius: 20,
+  background: "rgba(255,255,255,0.04)",
+  border: "1px solid rgba(255,255,255,0.1)",
+  color: "#e5e7eb",
+  resize: "vertical",
+  marginBottom: 32,
+};
+
+const actions = {
+  display: "flex",
+  justifyContent: "flex-end",
+  gap: 16,
+};
+
+const publishBtn = {
+  padding: "14px 28px",
+  borderRadius: 999,
+  background: "linear-gradient(135deg,#a78bfa,#7c3aed)",
+  border: "none",
+  fontWeight: 900,
+  cursor: "pointer",
+  color: "#020617",
+};
+
+const cancelBtn = {
+  padding: "14px 22px",
+  borderRadius: 999,
+  background: "transparent",
+  border: "1px solid rgba(255,255,255,0.15)",
+  color: "#94a3b8",
+  cursor: "pointer",
+};
